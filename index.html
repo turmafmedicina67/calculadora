@@ -155,7 +155,7 @@
       color: #94a3b8;
     }
 
-    /* Botão Detalhar Notas (MRAD) */
+    /* Botão Detalhar Notas (MRAD e HM) */
     .toggle-details-btn {
       display: inline-flex;
       align-items: center;
@@ -180,7 +180,7 @@
       transform: rotate(90deg);
     }
 
-    /* Área recolhível (MRAD) */
+    /* Área recolhível (MRAD - 2 colunas) */
     .details-container {
       display: none;
       padding: 14px 0 6px 0;
@@ -190,6 +190,33 @@
 
     .details-container.open {
       display: grid;
+    }
+
+    /* Área recolhível (HM - 3 colunas para as 7 anamneses) */
+    .hm-details-container {
+      display: none;
+      padding: 14px 0 6px 0;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px 24px;
+      align-items: start;
+    }
+
+    .hm-details-container.open {
+      display: grid;
+    }
+
+    .hm-anam-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hm-anam-display-col {
+      grid-column: 2 / 4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 4px;
     }
 
     .sub-subject-title {
@@ -417,6 +444,16 @@
       .details-container {
         grid-template-columns: 1fr;
         gap: 20px;
+      }
+
+      .hm-details-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .hm-anam-display-col {
+        grid-column: 1 / -1;
+        padding-top: 8px;
       }
 
       .mfc-praticas-grid {
@@ -671,8 +708,129 @@
       </div>
     </section>
 
+    <!-- ==========================================
+         ABA 3: HM (Habilidades Médicas)
+         ========================================== -->
+    <section id="tab-hm" class="tab-content">
+      <h1 class="calc-title">Calculadora</h1>
+
+      <div class="rules-box">
+        <strong>O cálculo de HM é:</strong><br>
+        AVC1 (Teórica) - 25%<br>
+        AVC2 (Teórica) - 25%<br>
+        AVC3 (Anamneses) - 10% (Média das 7 anamneses)<br>
+        AVC4 (OSCE) - 40% (Prática 1 + 2*Prática 2) / 3<br><br>
+        AVC = (2,5*AVC1 + 2,5*AVC2 + AVC3 + 4*AVC4) / 10
+      </div>
+
+      <!-- Seção de Anamneses -->
+      <div>
+        <h2 class="section-title">Anamneses <span>(10% da nota final)</span></h2>
+        <p class="section-subtitle">Coloque a nota final das atividades abaixo ou detalhe-as clicando na seta</p>
+
+        <input type="text" inputmode="decimal" id="hm_anam_direta" class="input-field hm-input" data-max="1" placeholder="Nota final das anamneses de 0 a 1">
+
+        <button type="button" id="btn_toggle_hm_details" class="toggle-details-btn">
+          <span class="arrow-icon">▶</span> Detalhar notas
+        </button>
+
+        <!-- Seção recolhível das 7 Anamneses -->
+        <div id="hm_details_box" class="hm-details-container">
+          <!-- Coluna 1: Anamneses 1 a 3 -->
+          <div class="hm-anam-col">
+            <input type="text" inputmode="decimal" id="hm_anam1" class="input-field hm-input" data-max="10" placeholder="Anamnese 1">
+            <input type="text" inputmode="decimal" id="hm_anam2" class="input-field hm-input" data-max="10" placeholder="Anamnese 2">
+            <input type="text" inputmode="decimal" id="hm_anam3" class="input-field hm-input" data-max="10" placeholder="Anamnese 3">
+          </div>
+
+          <!-- Coluna 2: Anamneses 4 e 5 -->
+          <div class="hm-anam-col">
+            <input type="text" inputmode="decimal" id="hm_anam4" class="input-field hm-input" data-max="10" placeholder="Anamnese 4">
+            <input type="text" inputmode="decimal" id="hm_anam5" class="input-field hm-input" data-max="10" placeholder="Anamnese 5">
+          </div>
+
+          <!-- Coluna 3: Anamneses 6 e 7 -->
+          <div class="hm-anam-col">
+            <input type="text" inputmode="decimal" id="hm_anam6" class="input-field hm-input" data-max="10" placeholder="Anamnese 6">
+            <input type="text" inputmode="decimal" id="hm_anam7" class="input-field hm-input" data-max="10" placeholder="Anamnese 7">
+          </div>
+
+          <!-- Display Flutuante de Anamnese -->
+          <div class="hm-anam-display-col">
+            <div class="floating-display" style="margin-top: 6px;">
+              <div class="label">Nota final de Anamnese:</div>
+              <div class="value" id="display_hm_anamneses">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Seção Inferior: Provas (Teóricas + Práticas) e Notas Finais de HM -->
+      <div class="bottom-grid">
+        <!-- Coluna da Esquerda: Provas Teóricas (50%) e Práticas (40%) -->
+        <div class="left-column">
+          <h2 class="section-title">Provas Teóricas <span>(50% da nota final)</span></h2>
+
+          <div class="provas-layout">
+            <div class="avc-inputs-stack">
+              <input type="text" inputmode="decimal" id="hm_avc1" class="input-field hm-input" data-max="10" placeholder="AVC 1 (25%)">
+              <input type="text" inputmode="decimal" id="hm_avc2" class="input-field hm-input" data-max="10" placeholder="AVC 2 (25%)">
+            </div>
+
+            <div class="floating-display" style="margin-top: 0;">
+              <div class="label">Média final de provas teóricas:</div>
+              <div class="value" id="display_hm_teoricas">0</div>
+            </div>
+          </div>
+
+          <h2 class="section-title" style="margin-top: 28px;">Provas Práticas <span>(40% da nota final)</span></h2>
+
+          <div class="provas-layout">
+            <div class="avc-inputs-stack">
+              <input type="text" inputmode="decimal" id="hm_osce1" class="input-field hm-input" data-max="10" placeholder="OSCE 1 (13,3%)">
+              <input type="text" inputmode="decimal" id="hm_osce2" class="input-field hm-input" data-max="10" placeholder="OSCE 2 (26,7%)">
+            </div>
+
+            <div class="floating-display" style="margin-top: 0;">
+              <div class="label">Média final de provas práticas:</div>
+              <div class="value" id="display_hm_praticas">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna da Direita: Nota Final AVC, AVG, AVI e Nota Final HM -->
+        <div class="right-column">
+          <div class="avc-final-wrapper">
+            <div class="label">Nota final de AVC:</div>
+            <div class="avc-final-box" id="display_hm_avc_final">0</div>
+          </div>
+
+          <div class="avg-avi-row">
+            <div>
+              <label for="hm_avg">Nota da AVG:</label>
+              <input type="text" inputmode="decimal" id="hm_avg" class="input-field hm-input" data-max="10">
+            </div>
+            <div>
+              <label for="hm_avi">Nota da AVI:</label>
+              <input type="text" inputmode="decimal" id="hm_avi" class="input-field hm-input" data-max="10">
+            </div>
+          </div>
+
+          <div class="final-grade-card">
+            <div class="title">Nota final de HM</div>
+            <div class="final-number" id="display_hm_final">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reset-container">
+        <button type="button" id="btn_reset_hm" class="reset-btn">Limpar notas de HM</button>
+      </div>
+    </section>
+
     <!-- ABAS FUTURAS (Serão preenchidas nos próximos passos) -->
-    <section id="tab-hm" class="tab-content"><h1 class="calc-title">HM (Em breve)</h1></section>
     <section id="tab-bt" class="tab-content"><h1 class="calc-title">BT (Em breve)</h1></section>
     <section id="tab-etica" class="tab-content"><h1 class="calc-title">Ética (Em breve)</h1></section>
     <section id="tab-pesquisa" class="tab-content"><h1 class="calc-title">Pesquisa (Em breve)</h1></section>
@@ -686,8 +844,10 @@
     let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
       activeTab: 'mrad',
       mradDetailsOpen: false,
+      hmDetailsOpen: false,
       lastAtivMode: 'direta',
       lastMfcPratMode: 'detalhada',
+      lastHmAnamMode: 'direta',
       inputs: {}
     };
 
@@ -745,6 +905,13 @@
         appData.lastMfcPratMode = 'direta';
       } else if (['mfc_prat1', 'mfc_prat2', 'mfc_prat3'].includes(inputEl.id)) {
         appData.lastMfcPratMode = 'detalhada';
+      }
+
+      // Registra se a pessoa acabou de digitar na nota rápida ou nas 7 anamneses (HM)
+      if (inputEl.id === 'hm_anam_direta') {
+        appData.lastHmAnamMode = 'direta';
+      } else if (['hm_anam1', 'hm_anam2', 'hm_anam3', 'hm_anam4', 'hm_anam5', 'hm_anam6', 'hm_anam7'].includes(inputEl.id)) {
+        appData.lastHmAnamMode = 'detalhada';
       }
 
       saveData();
@@ -853,6 +1020,58 @@
       document.getElementById('display_mfc_final').textContent = formatGrade(mfcFinal);
     }
 
+    // ==========================================
+    // CÁLCULO DE HM
+    // ==========================================
+    function calculateHM() {
+      const isDetailed = appData.hmDetailsOpen;
+      const directAnamInput = document.getElementById('hm_anam_direta');
+
+      let somaAnam = 0;
+      for (let i = 1; i <= 7; i++) {
+        somaAnam += parseGrade(document.getElementById(`hm_anam${i}`).value);
+      }
+
+      // Média das 7 anamneses valendo 10% (0 a 1)
+      const mediaDetalhadaAnam = (somaAnam / 7) * 0.1;
+      document.getElementById('display_hm_anamneses').textContent = formatGrade(mediaDetalhadaAnam);
+
+      // Permite usar tanto o campo rápido (0 a 1) quanto as 7 anamneses detalhadas
+      let notaFinalAnamneses = 0;
+      if (directAnamInput.value.trim() !== '' && (!isDetailed || appData.lastHmAnamMode === 'direta')) {
+        notaFinalAnamneses = parseGrade(directAnamInput.value);
+      } else if (mediaDetalhadaAnam > 0) {
+        notaFinalAnamneses = mediaDetalhadaAnam;
+      } else {
+        notaFinalAnamneses = parseGrade(directAnamInput.value);
+      }
+
+      // Provas Teóricas: AVC 1 (25%) + AVC 2 (25%) = 50% (0 a 5)
+      const avc1 = parseGrade(document.getElementById('hm_avc1').value);
+      const avc2 = parseGrade(document.getElementById('hm_avc2').value);
+      const mediaProvasTeoricas = ((avc1 + avc2) / 2) * 0.5;
+      document.getElementById('display_hm_teoricas').textContent = formatGrade(mediaProvasTeoricas);
+
+      // Provas Práticas (OSCE): ((OSCE 1 + 2 * OSCE 2) / 3) * 0,4 (0 a 4)
+      const osce1 = parseGrade(document.getElementById('hm_osce1').value);
+      const osce2 = parseGrade(document.getElementById('hm_osce2').value);
+      const mediaProvasPraticas = ((osce1 + (2 * osce2)) / 3) * 0.4;
+      document.getElementById('display_hm_praticas').textContent = formatGrade(mediaProvasPraticas);
+
+      // Nota Final de AVC: Anamneses (0 a 1) + Teóricas (0 a 5) + Práticas (0 a 4)
+      const avcFinal = notaFinalAnamneses + mediaProvasTeoricas + mediaProvasPraticas;
+      document.getElementById('display_hm_avc_final').textContent = formatGrade(avcFinal);
+
+      // Nota Final de HM: analisa AVC Final, AVG e AVI, descarta a menor e faz média simples das 2 maiores
+      const avg = parseGrade(document.getElementById('hm_avg').value);
+      const avi = parseGrade(document.getElementById('hm_avi').value);
+
+      const tresNotas = [avcFinal, avg, avi].sort((a, b) => b - a);
+      const hmFinal = (tresNotas[0] + tresNotas[1]) / 2;
+
+      document.getElementById('display_hm_final').textContent = formatGrade(hmFinal);
+    }
+
     // Controle de abrir/recolher o "Detalhar notas" (MRAD)
     const toggleBtn = document.getElementById('btn_toggle_details');
     const detailsBox = document.getElementById('mrad_details_box');
@@ -872,6 +1091,27 @@
       appData.mradDetailsOpen = !appData.mradDetailsOpen;
       saveData();
       updateDetailsUI();
+    });
+
+    // Controle de abrir/recolher o "Detalhar notas" (HM)
+    const toggleHmBtn = document.getElementById('btn_toggle_hm_details');
+    const hmDetailsBox = document.getElementById('hm_details_box');
+
+    function updateHmDetailsUI() {
+      if (appData.hmDetailsOpen) {
+        toggleHmBtn.classList.add('open');
+        hmDetailsBox.classList.add('open');
+      } else {
+        toggleHmBtn.classList.remove('open');
+        hmDetailsBox.classList.remove('open');
+      }
+      calculateHM();
+    }
+
+    toggleHmBtn.addEventListener('click', () => {
+      appData.hmDetailsOpen = !appData.hmDetailsOpen;
+      saveData();
+      updateHmDetailsUI();
     });
 
     // Controle de troca de Abas e Cores
@@ -925,6 +1165,18 @@
       });
     });
 
+    // Inicializa os eventos nos campos de HM
+    const hmInputs = document.querySelectorAll('.hm-input');
+    hmInputs.forEach(input => {
+      if (appData.inputs[input.id] !== undefined) {
+        input.value = appData.inputs[input.id];
+      }
+      input.addEventListener('input', () => {
+        validateAndClampInput(input);
+        calculateHM();
+      });
+    });
+
     // Botão para limpar apenas as notas de MRAD
     document.getElementById('btn_reset_mrad').addEventListener('click', () => {
       mradInputs.forEach(input => {
@@ -945,10 +1197,21 @@
       calculateMFC();
     });
 
+    // Botão para limpar apenas as notas de HM
+    document.getElementById('btn_reset_hm').addEventListener('click', () => {
+      hmInputs.forEach(input => {
+        input.value = '';
+        delete appData.inputs[input.id];
+      });
+      saveData();
+      calculateHM();
+    });
+
     // Restaura estado inicial ao abrir a página
     switchTab(appData.activeTab || 'mrad');
     updateDetailsUI();
     calculateMFC();
+    updateHmDetailsUI();
   </script>
 </body>
 </html>
